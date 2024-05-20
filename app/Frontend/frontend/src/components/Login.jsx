@@ -11,12 +11,19 @@ const Login = () => {
   const navigate = useNavigate();
   const route="/api/token/"
 
+  useEffect(() => {
+    let response=localStorage.getItem(ACCESS_TOKEN)
+    if (response) {
+      navigate("/");
+    }
+  }, []);
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const res = await api.post(route, { username, password });
-      console.log("res---------",res);
       localStorage.setItem(ACCESS_TOKEN, res.data.access);
       localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
       navigate("/");
