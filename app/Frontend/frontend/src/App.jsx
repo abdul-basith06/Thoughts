@@ -1,12 +1,23 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
 
-
-function App() {
-
-  return (
-    <>
-    <h1 className="text-3xl font-bold underline">Hello world</h1>
-    </>
-  )
+function RegisterAndLogout() {
+  localStorage.clear();
+  return <RegisterPage />;
 }
 
-export default App
+function App() {
+  return (
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterAndLogout />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
+}
+
+export default App;

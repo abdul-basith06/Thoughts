@@ -1,4 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+// import login, { getlocal } from "../helpers/auth";
+// import { useDispatch, useSelector } from "react-redux";
+// import { jwtDecode } from "jwt-decode";
+// import { updateToken, updateUser } from "../features/UserSlice";
+import toast, { Toaster } from "react-hot-toast";
 
 const Login = () => {
   return (
@@ -27,7 +33,7 @@ const Login = () => {
         <div className="flex justify-between mt-4 dark:text-white">
           <p>Dont have an account..??</p>
           <h6 className="text-#1d4ed8">
-            {/* <Link to="/register">Register here</Link> */}
+            <Link to="/register">Register here</Link>
           </h6>
         </div>
       </div>

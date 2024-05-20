@@ -1,4 +1,7 @@
-import React from 'react'
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 const Register = () => {
   return (
@@ -77,7 +80,7 @@ const Register = () => {
         <div className="flex justify-between mt-4 dark:text-white">
           <p>Already have an account?</p>
           <h6>
-            {/* <Link to="/login">Login</Link> */}
+            <Link to="/login">Login</Link>
           </h6>
         </div>
       </div>
