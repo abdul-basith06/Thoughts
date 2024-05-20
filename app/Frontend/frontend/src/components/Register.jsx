@@ -4,6 +4,53 @@ import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 const Register = () => {
+    const navigate = useNavigate();
+  // const {darkMode} = useSelector((state)=> state.darkMode)
+
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+
+  const signUpUser = async (e) => {
+    e.preventDefault();
+
+    // Basic validations
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (username.trim() === "") {
+      toast.error("Please enter a username.");
+      return;
+    } else if (!emailRegex.test(email)) {
+      toast.error("Enter a valid Email Id.");
+      return;
+    } else if (password !== password2) {
+      toast.error("Password didn't match!");
+      return;
+    } else if (password.length < 6) {
+      toast.error("Password should contain at least six characters!");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/register/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      if (response.status === 400) {
+        toast.error("Username or Email id already exist!");
+        navigate("/register");
+      } else {
+        toast.success("User Registered successfully!");
+        navigate("/login");
+      }
+    } catch (err) {
+      toast.error("Some error occurred:", err);
+      navigate("/register");
+    }
+  };
+
   return (
     <div
       className={
@@ -15,7 +62,7 @@ const Register = () => {
         <h2 className="text-3xl font-medium mb-4 text-black dark:text-white text-center">
           Sign Up
         </h2>
-        <form >
+        <form onSubmit={signUpUser}>
           <div className="mb-4">
             <label
               htmlFor="username"
