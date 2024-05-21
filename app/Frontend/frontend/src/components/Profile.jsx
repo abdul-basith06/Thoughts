@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import api from '../api'
 
 const Profile = () => {
   const [profile, setProfile] = useState({
@@ -10,29 +11,20 @@ const Profile = () => {
     profile_picture: "",
   });
 
-//   useEffect(() => {
-//     const fetchProfile = async () => {
-//       try {
-//         const tokenString = localStorage.getItem("authToken");
-//         const token = JSON.parse(tokenString);
-//         const accessToken = token.access;
 
-//         const response = await axios.get(
-//           "http://localhost:8000/api/user/profile/",
-//           {
-//             headers: {
-//               Authorization: `Bearer ${accessToken}`,
-//             },
-//           }
-//         );
-//         setProfile(response.data);
-//       } catch (error) {
-//         console.error("Error fetching profile:", error);
-//       }
-//     };
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get("/api/user/profile/");
+        setProfile(response.data);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    };
 
-//     fetchProfile();
-//   }, []);
+    fetchProfile();
+  }, []);
+
 
   const profilePictureUrl = profile.profile_picture
     ? profile.profile_picture
