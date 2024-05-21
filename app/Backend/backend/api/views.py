@@ -20,3 +20,12 @@ class RegisterView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+class UserUpdateProfile(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        user = request.user
+        serializer = self.get_serializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
