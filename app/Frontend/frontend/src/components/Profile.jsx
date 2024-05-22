@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import api from '../api'
+import { jwtDecode } from 'jwt-decode'
+import EditProfile from "./modals/EditProfile";
+import { ACCESS_TOKEN } from "../constants";
 
 const Profile = () => {
+
+  const getlocal =()=> {
+    let response=localStorage.getItem(ACCESS_TOKEN)
+    return response
+  }
+
+  const { user_id } = jwtDecode(getlocal());
+  const [isOpen, setIsOpen] = useState(false)
   const [profile, setProfile] = useState({
     username: "",
     email: "",
@@ -23,17 +34,16 @@ const Profile = () => {
     };
 
     fetchProfile();
-  }, []);
+  }, [user_id, isOpen]);
 
 
   const profilePictureUrl = profile.profile_picture
     ? profile.profile_picture
     : "https://wallpapers.com/images/featured/cool-profile-picture-87h46gcobjl5e4xu.jpg";
 
-  console.log("Profile picture URL:", profilePictureUrl);
 
   return (
-    <div className="p-4  h-full flex flex-col items-center mt-12">
+    <div className="p-4  h-full flex flex-col items-center bg-red-400">
       <h2 className="text-2xl font-bold mb-6">MY PROFILE</h2>
       <div className="flex flex-col items-center space-y-4">
         {/* Profile Picture */}
@@ -51,10 +61,13 @@ const Profile = () => {
         </div>
 
         {/* Edit Profile Button */}
-        <button className="mt-4 px-4 py-2 bg-white text-pink-700 rounded hover:bg-gray-200 transition">
+        <button onClick={()=>setIsOpen(true)} className="mt-4 px-4 py-2 bg-white text-pink-700 rounded hover:bg-gray-200 transition">
           Edit Profile
         </button>
       </div>
+      {isOpen && (
+        <EditProfile onClose={()=> setIsOpen(false)} profile={profile} setProfile={setProfile}/>
+      )}
     </div>
   );
 };
