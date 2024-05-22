@@ -24,6 +24,9 @@ class RegisterView(APIView):
 class UserUpdateProfile(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
+    
+    def get_object(self):
+        return self.request.user
 
     def retrieve(self, request, *args, **kwargs):
         user = request.user
