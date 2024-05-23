@@ -1,5 +1,6 @@
 import React from 'react'
 import Navbar from '../components/Navbar'
+import CreateThought from '../components/CreateThought'
 
 const HomePage = () => {
   return (
@@ -8,8 +9,8 @@ const HomePage = () => {
         <Navbar />
       </div>
      <div className="p-6 max-w-3xl mx-auto space-y-6">
-      {/* <CreateThought />
-      <ListThoughts /> */}
+      <CreateThought />
+      {/* <ListThoughts /> */}
      </div>
     </div>
   )
