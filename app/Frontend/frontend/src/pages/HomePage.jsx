@@ -2,6 +2,7 @@ import React from 'react'
 import Navbar from '../components/Navbar'
 import CreateThought from '../components/CreateThought'
 import toast, { Toaster } from "react-hot-toast";
+import ListThoughts from '../components/ListThoughts';
 
 const HomePage = () => {
   return (
@@ -12,7 +13,7 @@ const HomePage = () => {
       </div>
      <div className="p-6 max-w-3xl mx-auto space-y-6">
       <CreateThought />
-      {/* <ListThoughts /> */}
+      <ListThoughts />
      </div>
     </div>
   )

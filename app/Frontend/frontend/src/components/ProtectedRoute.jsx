@@ -1,10 +1,11 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import api from "../api";
 import { jwtDecode } from "jwt-decode";
 import { useState, useEffect } from "react";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
 function ProtectedRoute({ children }) {
+    const navigate = useNavigate()
     const [isAuthorized, setIsAuthorized] = useState(null);
 
     useEffect(() => {
@@ -24,8 +25,11 @@ function ProtectedRoute({ children }) {
                 setIsAuthorized(false)
             }
         } catch (error) {
-            console.log(error);
+            console.log("error is in here",error);
+            localStorage.removeItem(ACCESS_TOKEN);
+            localStorage.removeItem(REFRESH_TOKEN);
             setIsAuthorized(false);
+            navigate("/login")
         }
     };
 
