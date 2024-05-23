@@ -1,10 +1,12 @@
 import React from 'react'
 import Navbar from '../components/Navbar'
 import CreateThought from '../components/CreateThought'
+import toast, { Toaster } from "react-hot-toast";
 
 const HomePage = () => {
   return (
     <div>
+        <Toaster position="top-left" reverseOrder="false"></Toaster>
       <div className='bg-slate-900'>
         <Navbar />
       </div>
