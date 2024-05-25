@@ -33,7 +33,7 @@ class UserUpdateProfile(RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-class ThoughtsCreateListView(ListCreateAPIView) :
+class ThoughtsCreateListView(ListCreateAPIView):
     queryset = Thoughts.objects.all()
     serializer_class = ThoughtsSerializer
     permission_classes = [IsAuthenticated]
@@ -60,6 +60,10 @@ class ThoughtsCreateListView(ListCreateAPIView) :
             except Exception as e:
                 profile_picture_url = None
 
+            is_liked = False
+            if request.user.is_authenticated:
+                is_liked = request.user in thought.likes.all()
+
             serialized_thought = {
                 'id': thought.id,
                 'title': thought.title,
@@ -70,7 +74,32 @@ class ThoughtsCreateListView(ListCreateAPIView) :
                     'username': thought.author.username,
                     'profile_picture': profile_picture_url
                 },
-                'likes_count': thought.get_total_likes()
+                'likes_count': thought.get_total_likes(),
+                'is_liked': is_liked
             }
             serialized_thoughts.append(serialized_thought)
         return Response(serialized_thoughts)
+
+    
+class LikeUnlikeThoughts(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        thought_id = request.data.get('thought_id')
+        action = request.data.get('action')
+
+        if thought_id and action:
+            try:
+                thought = Thoughts.objects.get(id=thought_id)
+                user = request.user
+
+                if action == 'like':
+                    thought.likes.add(user)
+                elif action == 'unlike':
+                    thought.likes.remove(user)
+
+                return Response(status=status.HTTP_200_OK)
+            except Thoughts.DoesNotExist:
+                return Response({'error': 'Thought not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)

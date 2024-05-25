@@ -31,3 +31,9 @@ class ThoughtsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Thoughts
         fields = '__all__'
+        
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(id=request.user.id).exists()
+        return False

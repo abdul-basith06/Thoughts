@@ -10,7 +10,7 @@ class UserProfile(AbstractUser):
     
 class Thoughts(models.Model):
     title = models.CharField(max_length=100)
-    content = models.TextField()
+    content = models.CharField(max_length=300)
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="thoughts", null=True, blank=True)
     likes = models.ManyToManyField(UserProfile, related_name="liked_thoughts", blank=True)
