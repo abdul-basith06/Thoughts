@@ -23,3 +23,12 @@ class Thoughts(models.Model):
 
     class Meta:
         ordering = ['-created_at'] 
+        
+class Comment(models.Model):
+    content = models.CharField(max_length=300)
+    created_at = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="comments")
+    thought = models.ForeignKey(Thoughts, on_delete=models.CASCADE, related_name="comments")
+
+    def __str__(self):
+        return self.content[:20]

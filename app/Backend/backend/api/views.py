@@ -103,3 +103,73 @@ class LikeUnlikeThoughts(APIView):
                 return Response({'error': 'Thought not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class CommentCreateView(ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes =  [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+        
+class ThoughtDetailView(RetrieveAPIView):
+    queryset = Thoughts.objects.all()
+    serializer_class = ThoughtsSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        thought = self.get_object()
+        profile_picture_url = None
+        try:
+            if thought.author.profile_picture:
+                profile_picture_url = request.build_absolute_uri(thought.author.profile_picture.url)
+        except Exception as e:
+            profile_picture_url = None
+
+        is_liked = False
+        if request.user.is_authenticated:
+            is_liked = request.user in thought.likes.all()
+            
+        # Fetching comments for the thought
+        comments = thought.comments.all()
+        serialized_comments = [
+            {
+                'id': comment.id,
+                'content': comment.content,
+                'created_at': comment.created_at,
+                'author': {
+                    'id': comment.author.id,
+                    'username': comment.author.username,
+                    'profile_picture': request.build_absolute_uri(comment.author.profile_picture.url) if comment.author.profile_picture else None
+                }
+            }
+            for comment in comments
+        ]
+
+        serialized_thought = {
+            'id': thought.id,
+            'title': thought.title,
+            'content': thought.content,
+            'created_at': thought.created_at,
+            'author': {
+                'id': thought.author.id,
+                'username': thought.author.username,
+                'profile_picture': profile_picture_url
+            },
+            'likes_count': thought.get_total_likes(),
+            'is_liked': is_liked,
+            'comments': serialized_comments
+            # 'comments': [
+            #     {
+            #         'id': comment.id,
+            #         'content': comment.content,
+            #         'created_at': comment.created_at,
+            #         'author': {
+            #             'id': comment.author.id,
+            #             'username': comment.author.username,
+            #             'profile_picture': request.build_absolute_uri(comment.author.profile_picture.url) if comment.author.profile_picture else None,
+            #         }
+            #     } for comment in thought.comments.all()
+            # ]
+        }
+        return Response(serialized_thought)

@@ -9,5 +9,8 @@ urlpatterns = [
     path('register/', RegisterView.as_view()),
     path("user/profile/", UserUpdateProfile.as_view(), name="user-profile"),
     path("thoughts/", ThoughtsCreateListView.as_view(), name="thoughts-create-list"),
+    path("thoughts/<int:pk>/", ThoughtDetailView.as_view(), name="thought-detail"),
     path("like_unlike/", LikeUnlikeThoughts.as_view(), name="like-unlike-thoughts"),
+    # path("comments/<int:pk>/"), FetchCommentsView.as_view(), name="fetch-comments"),
+    path('comments/', CommentCreateView.as_view(), name='comment-create'),
 ]

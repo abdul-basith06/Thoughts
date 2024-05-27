@@ -24,9 +24,17 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()    
         return instance     
+    
+class CommentSerializer(serializers.ModelSerializer):
+    author_username = serializers.ReadOnlyField(source='author.username')
+    
+    class Meta:
+        model = Comment
+        fields = '__all__'
         
 class ThoughtsSerializer(serializers.ModelSerializer):
     
+    comments = CommentSerializer(many=True, read_only=True)
     
     class Meta:
         model = Thoughts
@@ -37,3 +45,4 @@ class ThoughtsSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.likes.filter(id=request.user.id).exists()
         return False
+    
