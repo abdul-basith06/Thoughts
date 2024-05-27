@@ -2,13 +2,17 @@ import React, { useState, useEffect } from "react";
 import api from "../api";
 import formatThoughtDate from "../utils/formatThoughtDate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThumbsUp } from "@fortawesome/free-solid-svg-icons";
+import { faThumbsUp, faComment } from "@fortawesome/free-solid-svg-icons";
+import CommentSection from "./CommentSection";
+import Comments from "./modals/Comments";
 
 const ListThoughts = () => {
   const [thoughts, setThoughts] = useState([]);
   const [likedThoughts, setLikedThoughts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedThoughtId, setSelectedThoughtId] = useState(null);
 
   // In the useEffect to fetch thoughts, include setting liked status
   useEffect(() => {
@@ -37,6 +41,7 @@ const ListThoughts = () => {
 
   const handleLike = async (id) => {
     try {
+      console.log("id",id);
       const action = likedThoughts[id] ? "unlike" : "like";
       await api.post("/api/like_unlike/", { thought_id: id, action });
 
@@ -61,6 +66,11 @@ const ListThoughts = () => {
     } catch (error) {
       console.error("Error:", error);
     }
+  };
+
+  const openComments = (thoughtId) => {
+    setSelectedThoughtId(thoughtId);
+    setIsOpen(true);
   };
 
   if (loading) {
@@ -106,9 +116,26 @@ const ListThoughts = () => {
               onClick={() => handleLike(thought.id)}
             />
             {thought.likes_count} likes
+
+            {/* Comment section */}
+            <FontAwesomeIcon
+              icon={faComment}
+              className="ml-4 mr-2 cursor-pointer hover:text-black"
+              onClick={() => openComments(thought.id)}
+            />
           </div>
+
+         
         </div>
       ))}
+      {isOpen && (
+        <Comments
+          onClose={() => setIsOpen(false)}
+          thoughtId={selectedThoughtId}
+          handleLike={handleLike}
+          likedThoughts={likedThoughts}
+        />
+      )}
     </div>
   );
 };
