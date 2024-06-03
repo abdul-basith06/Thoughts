@@ -1,11 +1,26 @@
 import React, { useEffect, useState } from "react";
 import api from "../api";
+import { jwtDecode } from "jwt-decode";
+import { ACCESS_TOKEN } from "../constants";
 import FormatActiveDate from "../utils/formatActiveDate";
 
 const UserProfileComp = ({ userId }) => {
   const [user, setUser] = useState("");
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem(ACCESS_TOKEN);
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        const loggedInUserId = decodedToken.user_id;
+
+        setIsOwnProfile(loggedInUserId === parseInt(userId, 10));
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+
     const fetchUser = async () => {
       try {
         const response = await api.get(`/api/user/details/${userId}/`);
@@ -17,6 +32,22 @@ const UserProfileComp = ({ userId }) => {
 
     fetchUser();
   }, [userId]);
+
+  const handleConnect = async () => {
+    try {
+      const response = await api.post(
+        "/api/connections/send/",
+        { to_user: userId }
+      );
+      alert(response.data.detail);
+    } catch (error) {
+      console.error(
+        "There was an error sending the connection request!",
+        error
+      );
+      alert("Failed to send connection request.");
+    }
+  };
 
   const profilePictureUrl = user.profile_picture
     ? user.profile_picture
@@ -56,23 +87,28 @@ const UserProfileComp = ({ userId }) => {
             </p>
 
             <p className="text-md">
-               <FormatActiveDate lastLogin={user.last_login} />
+              <FormatActiveDate lastLogin={user.last_login} />
             </p>
           </div>
           <div className="mt-8 w-full text-center">
-          <h3 className="text-xl font-semibold text-black">5</h3>
-          <p className="text-md text-gray-600">Connections</p>
-        </div>
-          <div className="mt-8 space-x-4">
-            <button className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer">
-              Connect
-            </button>
-            <button className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer">
-              Chat
-            </button>
+            <h3 className="text-xl font-semibold text-black">5</h3>
+            <p className="text-md text-gray-600">Connections</p>
           </div>
+
+          {!isOwnProfile && (
+            <div className="mt-8 space-x-4">
+              <button
+                onClick={handleConnect}
+                className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer"
+              >
+                Connect
+              </button>
+              <button className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer">
+                Chat
+              </button>
+            </div>
+          )}
         </div>
-       
       </div>
     </div>
   );
