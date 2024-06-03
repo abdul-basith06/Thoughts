@@ -1,0 +1,81 @@
+import React, { useEffect, useState } from "react";
+import api from "../api";
+import FormatActiveDate from "../utils/formatActiveDate";
+
+const UserProfileComp = ({ userId }) => {
+  const [user, setUser] = useState("");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await api.get(`/api/user/details/${userId}/`);
+        setUser(response.data);
+      } catch (error) {
+        console.error("There was an error fetching the user data!", error);
+      }
+    };
+
+    fetchUser();
+  }, [userId]);
+
+  const profilePictureUrl = user.profile_picture
+    ? user.profile_picture
+    : "https://wallpapers.com/images/featured/cool-profile-picture-87h46gcobjl5e4xu.jpg";
+
+  return (
+    <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <div className="flex flex-col items-center p-8">
+        <div className="relative w-full flex justify-center">
+          {user.profile_picture ? (
+            <img
+              className="h-32 w-32 object-cover rounded-full border-4 border-white shadow-md"
+              src={profilePictureUrl}
+              alt=""
+            />
+          ) : (
+            <div className="h-32 w-32 flex items-center justify-center bg-gray-200 text-gray-500 rounded-full border-4 border-white shadow-md">
+              No Image
+            </div>
+          )}
+        </div>
+        <div className="text-center mt-6 w-full">
+          <h2 className="text-2xl leading-tight font-bold text-black">
+            {user.username}
+          </h2>
+          <p className="mt-4 text-lg text-gray-600">{user.bio}</p>
+          <div className="mt-4 text-gray-500">
+            <p className="text-md">Email: {user.email}</p>
+            <p className="text-md">Mobile: {user.mobile}</p>
+            <p className="text-md">
+              Joined:{" "}
+              {new Date(user.created_at).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </p>
+
+            <p className="text-md">
+               <FormatActiveDate lastLogin={user.last_login} />
+            </p>
+          </div>
+          <div className="mt-8 w-full text-center">
+          <h3 className="text-xl font-semibold text-black">5</h3>
+          <p className="text-md text-gray-600">Connections</p>
+        </div>
+          <div className="mt-8 space-x-4">
+            <button className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer">
+              Connect
+            </button>
+            <button className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer">
+              Chat
+            </button>
+          </div>
+        </div>
+       
+      </div>
+    </div>
+  );
+};
+
+export default UserProfileComp;

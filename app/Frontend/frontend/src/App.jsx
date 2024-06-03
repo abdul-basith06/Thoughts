@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
+import UserProfile from "./pages/UserProfile";
 
 function Logout() {
   localStorage.clear();
@@ -39,6 +40,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+              <Route
+            path="/profilepage/:userId"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+          
         </Routes>
       </BrowserRouter>
     </>

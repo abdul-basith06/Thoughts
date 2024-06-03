@@ -3,7 +3,7 @@ import api from "../api";
 import formatThoughtDate from "../utils/formatThoughtDate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbsUp, faComment } from "@fortawesome/free-solid-svg-icons";
-import CommentSection from "./CommentSection";
+import { Link } from "react-router-dom";
 import Comments from "./modals/Comments";
 
 const ListThoughts = () => {
@@ -41,7 +41,7 @@ const ListThoughts = () => {
 
   const handleLike = async (id) => {
     try {
-      console.log("id",id);
+      console.log("id", id);
       const action = likedThoughts[id] ? "unlike" : "like";
       await api.post("/api/like_unlike/", { thought_id: id, action });
 
@@ -91,20 +91,25 @@ const ListThoughts = () => {
           className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6"
         >
           <div className="flex items-center mb-4">
-            <img
-              className="rounded-full w-10 h-10 mr-4"
-              src={thought.author.profile_picture} // Default picture
-              alt="Author DP"
-            />
+            <Link  to={`/profilepage/${thought.author.id}`}>
+              <img
+                className="rounded-full w-10 h-10 mr-4"
+                src={thought.author.profile_picture} 
+                alt="Author DP"
+              />
+            </Link>
             <div>
-              <h2 className="text-lg font-semibold">
-                {thought.author.username}
-              </h2>
+              <Link  to={`/profilepage/${thought.author.id}`}>
+                <h2 className="text-lg font-semibold">
+                  {thought.author.username}
+                </h2>
+              </Link>
               <p className="text-gray-500 dark:text-gray-400">
                 {formatThoughtDate(thought.created_at)}
               </p>
             </div>
           </div>
+
           <h2 className="text-lg font-bold">{thought.title}</h2>
           <p className="text-gray-700 dark:text-gray-300">{thought.content}</p>
           <div className="text-gray-500 dark:text-gray-400 text-sm mt-4">
@@ -116,7 +121,6 @@ const ListThoughts = () => {
               onClick={() => handleLike(thought.id)}
             />
             {thought.likes_count} likes
-
             {/* Comment section */}
             <FontAwesomeIcon
               icon={faComment}
@@ -124,8 +128,6 @@ const ListThoughts = () => {
               onClick={() => openComments(thought.id)}
             />
           </div>
-
-         
         </div>
       ))}
       {isOpen && (
