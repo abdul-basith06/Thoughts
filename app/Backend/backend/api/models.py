@@ -7,6 +7,44 @@ class UserProfile(AbstractUser):
     mobile = models.CharField(max_length=15, null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    connections = models.ManyToManyField('self', through='Connection', symmetrical=False, related_name='connected_to')
+    
+class ConnectionRequest(models.Model):
+    from_user = models.ForeignKey(UserProfile, related_name='sent_requests', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(UserProfile, related_name='received_requests', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('from_user', 'to_user')
+        indexes = [
+            models.Index(fields=['from_user']),
+            models.Index(fields=['to_user']),
+        ]
+
+class Connection(models.Model):
+    user1 = models.ForeignKey(UserProfile, related_name='connections1', on_delete=models.CASCADE)
+    user2 = models.ForeignKey(UserProfile, related_name='connections2', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user1', 'user2')
+        indexes = [
+            models.Index(fields=['user1']),
+            models.Index(fields=['user2']),
+        ]
+
+class BlockedUser(models.Model):
+    user = models.ForeignKey(UserProfile, related_name='blocker', on_delete=models.CASCADE)
+    blocked_user = models.ForeignKey(UserProfile, related_name='blocked', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'blocked_user')
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['blocked_user']),
+        ]
     
 class Thoughts(models.Model):
     title = models.CharField(max_length=100)

@@ -159,17 +159,55 @@ class ThoughtDetailView(RetrieveAPIView):
             'likes_count': thought.get_total_likes(),
             'is_liked': is_liked,
             'comments': serialized_comments
-            # 'comments': [
-            #     {
-            #         'id': comment.id,
-            #         'content': comment.content,
-            #         'created_at': comment.created_at,
-            #         'author': {
-            #             'id': comment.author.id,
-            #             'username': comment.author.username,
-            #             'profile_picture': request.build_absolute_uri(comment.author.profile_picture.url) if comment.author.profile_picture else None,
-            #         }
-            #     } for comment in thought.comments.all()
-            # ]
         }
         return Response(serialized_thought)
+    
+class SendConnectionRequestView(generics.CreateAPIView):
+    serializer_class = ConnectionRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        from_user = request.user
+        to_user_id = request.data.get('to_user')
+        to_user = UserProfile.objects.get(id=to_user_id)
+        if BlockedUser.objects.filter(user=to_user, blocked_user=from_user).exists():
+            return Response({"detail": "You are blocked by this user."}, status=status.HTTP_403_FORBIDDEN)
+        connection_request, created = ConnectionRequest.objects.get_or_create(from_user=from_user, to_user=to_user)
+        if created:
+            return Response({"detail": "Connection request sent."}, status=status.HTTP_201_CREATED)
+        return Response({"detail": "Connection request already exists."}, status=status.HTTP_200_OK)
+
+class HandleConnectionRequestView(generics.UpdateAPIView):
+    serializer_class = ConnectionRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        connection_request_id = request.data.get('request_id')
+        action = request.data.get('action')
+        connection_request = ConnectionRequest.objects.get(id=connection_request_id)
+        if action == 'accept':
+            Connection.objects.create(user1=connection_request.from_user, user2=connection_request.to_user)
+            connection_request.delete()
+            return Response({"detail": "Connection request accepted."}, status=status.HTTP_200_OK)
+        elif action == 'reject':
+            connection_request.delete()
+            return Response({"detail": "Connection request rejected."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+
+class BlockUserView(generics.CreateAPIView):
+    serializer_class = BlockedUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        blocked_user_id = request.data.get('blocked_user')
+        blocked_user = UserProfile.objects.get(id=blocked_user_id)
+        BlockedUser.objects.get_or_create(user=user, blocked_user=blocked_user)
+        ConnectionRequest.objects.filter(from_user=blocked_user, to_user=user).delete()
+        ConnectionRequest.objects.filter(from_user=user, to_user=blocked_user).delete()
+        return Response({"detail": "User blocked."}, status=status.HTTP_201_CREATED)
+    
+class UserDetailsListView(generics.RetrieveAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]

@@ -46,3 +46,18 @@ class ThoughtsSerializer(serializers.ModelSerializer):
             return obj.likes.filter(id=request.user.id).exists()
         return False
     
+class ConnectionRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConnectionRequest
+        fields = '__all__'
+
+class ConnectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Connection
+        fields = '__all__'
+
+class BlockedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlockedUser
+        fields = '__all__'
+    

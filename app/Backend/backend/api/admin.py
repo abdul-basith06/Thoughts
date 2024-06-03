@@ -5,3 +5,6 @@ from .models import *
 admin.site.register(UserProfile)
 admin.site.register(Thoughts)
 admin.site.register(Comment)
+admin.site.register(ConnectionRequest)
+admin.site.register(Connection)
+admin.site.register(BlockedUser)
