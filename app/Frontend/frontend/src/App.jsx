@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
 import UserProfile from "./pages/UserProfile";
+import FriendRequestPage from "./pages/FriendRequestPage";
 
 function Logout() {
   localStorage.clear();
@@ -45,6 +46,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserProfile />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/friends"
+            element={
+              <ProtectedRoute>
+                <FriendRequestPage />
               </ProtectedRoute>
             }
           />

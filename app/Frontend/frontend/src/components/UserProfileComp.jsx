@@ -2,24 +2,40 @@ import React, { useEffect, useState } from "react";
 import api from "../api";
 import { jwtDecode } from "jwt-decode";
 import { ACCESS_TOKEN } from "../constants";
+import toast, { Toaster } from "react-hot-toast";
 import FormatActiveDate from "../utils/formatActiveDate";
 
 const UserProfileComp = ({ userId }) => {
   const [user, setUser] = useState("");
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [hasPending, setHasPending] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem(ACCESS_TOKEN);
+    let loggedInUserId;
+
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
-        const loggedInUserId = decodedToken.user_id;
-
+        loggedInUserId = decodedToken.user_id;
         setIsOwnProfile(loggedInUserId === parseInt(userId, 10));
       } catch (error) {
         console.error("Error decoding token:", error);
       }
     }
+
+    const fetchPendingRequests = async () => {
+      try {
+        const response = await api.get(
+          `/api/connections/pending/${userId}/${loggedInUserId}/`
+        );
+        const pendingRequests = response.data;
+        console.log("pendingRequests", pendingRequests);
+        setHasPending(pendingRequests.length > 0);
+      } catch (error) {
+        console.error("Error fetching pending requests:", error);
+      }
+    };
 
     const fetchUser = async () => {
       try {
@@ -30,16 +46,19 @@ const UserProfileComp = ({ userId }) => {
       }
     };
 
+    if (loggedInUserId !== undefined) {
+      fetchPendingRequests();
+    }
     fetchUser();
   }, [userId]);
 
   const handleConnect = async () => {
     try {
-      const response = await api.post(
-        "/api/connections/send/",
-        { to_user: userId }
-      );
+      const response = await api.post("/api/connections/send/", {
+        to_user: userId,
+      });
       alert(response.data.detail);
+      toast.success(response.data.detail);
     } catch (error) {
       console.error(
         "There was an error sending the connection request!",
@@ -53,9 +72,11 @@ const UserProfileComp = ({ userId }) => {
     ? user.profile_picture
     : "https://wallpapers.com/images/featured/cool-profile-picture-87h46gcobjl5e4xu.jpg";
 
+
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
       <div className="flex flex-col items-center p-8">
+        <Toaster position="top-left" reverseOrder="false"></Toaster>
         <div className="relative w-full flex justify-center">
           {user.profile_picture ? (
             <img
@@ -99,9 +120,14 @@ const UserProfileComp = ({ userId }) => {
             <div className="mt-8 space-x-4">
               <button
                 onClick={handleConnect}
-                className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer"
+                disabled={hasPending}
+                className={`px-6 py-2 text-white rounded transition ${
+                  hasPending
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gray-500 hover:bg-amber-600 cursor-pointer"
+                }`}
               >
-                Connect
+                {hasPending ? "Connection Pending" : "Connect"}
               </button>
               <button className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer">
                 Chat
