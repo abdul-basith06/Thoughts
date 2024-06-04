@@ -207,6 +207,79 @@ class BlockUserView(generics.CreateAPIView):
         ConnectionRequest.objects.filter(from_user=user, to_user=blocked_user).delete()
         return Response({"detail": "User blocked."}, status=status.HTTP_201_CREATED)
     
+class PendingConnectionRequestsView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        pending_requests = ConnectionRequest.objects.filter(to_user=user)
+        serialized_requests = []
+        
+        for request in pending_requests:
+            from_user_profile = request.from_user
+            profile_picture_url = None
+            
+            try:
+                if from_user_profile.profile_picture:
+                    profile_picture_url = self.request.build_absolute_uri(from_user_profile.profile_picture.url)
+            except Exception as e:
+                profile_picture_url = None
+            
+            serialized_request = {
+                'id': request.id,
+                'from_user': {
+                    'id': from_user_profile.id,
+                    'username': from_user_profile.username,
+                    'email': from_user_profile.email,
+                    'profile_picture': profile_picture_url,
+                },
+                'timestamp': request.timestamp,
+            }
+            serialized_requests.append(serialized_request)
+        
+        return Response(serialized_requests)
+    
+class SpecificPendingRequestsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, from_user_id, to_user_id):
+        try:
+            from_user_id = int(from_user_id)
+            to_user_id = int(to_user_id)
+        except ValueError:
+            return Response({"error": "Invalid user ID format"}, status=400)
+
+
+        pending_requests = ConnectionRequest.objects.filter(
+            from_user__id=from_user_id, to_user__id=to_user_id
+        )
+        print("pending --", pending_requests)
+
+        serialized_requests = []
+        for request in pending_requests:
+            from_user_profile = request.from_user
+            profile_picture_url = None
+
+            if from_user_profile.profile_picture:
+                try:
+                    profile_picture_url = self.request.build_absolute_uri(from_user_profile.profile_picture.url)
+                except Exception as e:
+                    profile_picture_url = None
+
+            serialized_request = {
+                'id': request.id,
+                'from_user': {
+                    'id': from_user_profile.id,
+                    'username': from_user_profile.username,
+                    'email': from_user_profile.email,
+                    'profile_picture': profile_picture_url,
+                },
+                'timestamp': request.timestamp,
+            }
+            serialized_requests.append(serialized_request)
+
+        return Response(serialized_requests)
+    
 class UserDetailsListView(generics.RetrieveAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserSerializer

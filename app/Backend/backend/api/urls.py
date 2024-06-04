@@ -16,6 +16,8 @@ urlpatterns = [
     path('comments/', CommentCreateView.as_view(), name='comment-create'),
     
     path('connections/send/', SendConnectionRequestView.as_view(), name='send-connection-request'),
+    path('connections/pending/', PendingConnectionRequestsView.as_view(), name='pending-connection-requests'),  
+    path('connections/pending/<int:from_user_id>/<int:to_user_id>/', SpecificPendingRequestsView.as_view(), name='specific-pending-requests'),
     path('connections/handle/', HandleConnectionRequestView.as_view(), name='handle-connection-request'),
     path('connections/block/', BlockUserView.as_view(), name='block-user'),
 ]
