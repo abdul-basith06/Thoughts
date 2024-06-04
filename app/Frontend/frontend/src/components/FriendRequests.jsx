@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../api";
 import { Link } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 const FriendRequests = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
@@ -40,9 +41,10 @@ const FriendRequests = () => {
         action: "accept",
       });
       setPendingRequests(pendingRequests.filter((req) => req.id !== requestId));
-      // Optionally, refetch friends or update state directly
+      toast.success("Connection request accepted")
     } catch (error) {
       console.error("Error accepting request:", error);
+      toast.error("Error accepting request")
     }
   };
 
@@ -53,13 +55,16 @@ const FriendRequests = () => {
         action: "reject",
       });
       setPendingRequests(pendingRequests.filter((req) => req.id !== requestId));
+      toast.success("Connection request rejected")
     } catch (error) {
       console.error("Error rejecting request:", error);
+      toast.error("Error rejecting request")
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
+        <Toaster position="top-left" reverseOrder="false"></Toaster>
       <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
         Friend Requests
       </h2>

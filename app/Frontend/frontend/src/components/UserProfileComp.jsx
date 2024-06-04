@@ -30,7 +30,6 @@ const UserProfileComp = ({ userId }) => {
           `/api/connections/pending/${userId}/${loggedInUserId}/`
         );
         const pendingRequests = response.data;
-        console.log("pendingRequests", pendingRequests);
         setHasPending(pendingRequests.length > 0);
       } catch (error) {
         console.error("Error fetching pending requests:", error);
@@ -57,14 +56,13 @@ const UserProfileComp = ({ userId }) => {
       const response = await api.post("/api/connections/send/", {
         to_user: userId,
       });
-      alert(response.data.detail);
       toast.success(response.data.detail);
     } catch (error) {
       console.error(
         "There was an error sending the connection request!",
         error
       );
-      alert("Failed to send connection request.");
+      toast.error("Failed to send connection request.");
     }
   };
 
