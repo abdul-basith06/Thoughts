@@ -6,32 +6,29 @@ import toast, { Toaster } from "react-hot-toast";
 const FriendRequests = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [friends, setFriends] = useState([]);
- 
+
+  const fetchPendingRequests = async () => {
+    try {
+      const response = await api.get("/api/connections/pending/");
+      setPendingRequests(response.data);
+    } catch (error) {
+      console.error("Error fetching pending requests:", error);
+    }
+  };
+
+  const fetchFriends = async () => {
+    try {
+      const response = await api.get("/api/connections/friends/");
+      setFriends(response.data);
+    } catch (error) {
+      console.error("Error fetching friends:", error);
+      toast.error("Error fetching friends");
+    }
+  };
 
   useEffect(() => {
-    const fetchPendingRequests = async () => {
-      try {
-        const response = await api.get("/api/connections/pending/");
-        setPendingRequests(response.data);
-      
-      } catch (error) {
-        console.error("Error fetching pending requests:", error);
-      }
-    };
-
-
-
-    // const fetchFriends = async () => {
-    //   try {
-    //     const response = await api.get('/api/connections/send/');
-    //     // setFriends(response.data);
-    //   } catch (error) {
-    //     console.error('Error fetching friends:', error);
-    //   }
-    // };
-
     fetchPendingRequests();
-    // fetchFriends();
+    fetchFriends();
   }, []);
 
   const handleAcceptRequest = async (requestId) => {
@@ -41,10 +38,11 @@ const FriendRequests = () => {
         action: "accept",
       });
       setPendingRequests(pendingRequests.filter((req) => req.id !== requestId));
-      toast.success("Connection request accepted")
+      toast.success("Connection request accepted");
+      fetchFriends();
     } catch (error) {
       console.error("Error accepting request:", error);
-      toast.error("Error accepting request")
+      toast.error("Error accepting request");
     }
   };
 
@@ -55,16 +53,17 @@ const FriendRequests = () => {
         action: "reject",
       });
       setPendingRequests(pendingRequests.filter((req) => req.id !== requestId));
-      toast.success("Connection request rejected")
+      toast.success("Connection request rejected");
+      fetchFriends();
     } catch (error) {
       console.error("Error rejecting request:", error);
-      toast.error("Error rejecting request")
+      toast.error("Error rejecting request");
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
-        <Toaster position="top-left" reverseOrder="false"></Toaster>
+      <Toaster position="top-left" reverseOrder="false"></Toaster>
       <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
         Friend Requests
       </h2>
@@ -132,15 +131,21 @@ const FriendRequests = () => {
               key={friend.id}
               className="flex items-center mb-6 p-4 bg-gray-100 rounded-lg shadow-sm"
             >
-              <img
-                src={friend.profile_picture || "https://via.placeholder.com/50"}
-                alt={friend.username}
-                className="w-12 h-12 rounded-full object-cover mr-4"
-              />
+              <Link to={`/profilepage/${friend.id}`}>
+                <img
+                  src={
+                    friend.profile_picture || "https://via.placeholder.com/50"
+                  }
+                  alt={friend.username}
+                  className="w-12 h-12 rounded-full object-cover mr-4"
+                />
+              </Link>
               <div>
-                <p className="text-lg font-semibold text-gray-800">
-                  {friend.username}
-                </p>
+                <Link to={`/profilepage/${friend.id}`}>
+                  <p className="text-lg font-semibold text-gray-800">
+                    {friend.username}
+                  </p>
+                </Link>
                 <p className="text-gray-600">{friend.email}</p>
               </div>
             </div>

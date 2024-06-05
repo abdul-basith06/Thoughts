@@ -9,6 +9,7 @@ const UserProfileComp = ({ userId }) => {
   const [user, setUser] = useState("");
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [hasPending, setHasPending] = useState(false);
+  const [isFriend, setIsFriend] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem(ACCESS_TOKEN);
@@ -36,6 +37,15 @@ const UserProfileComp = ({ userId }) => {
       }
     };
 
+    const checkFriendship = async () => {
+      try {
+        const response = await api.get(`/api/connections/check_friendship/${userId}/${loggedInUserId}/`);
+        setIsFriend(response.data.are_friends);
+      } catch (error) {
+        console.error("Error checking friendship status:", error);
+      }
+    };
+
     const fetchUser = async () => {
       try {
         const response = await api.get(`/api/user/details/${userId}/`);
@@ -49,6 +59,7 @@ const UserProfileComp = ({ userId }) => {
       fetchPendingRequests();
     }
     fetchUser();
+    checkFriendship();
   }, [userId]);
 
   const handleConnect = async () => {
@@ -114,7 +125,7 @@ const UserProfileComp = ({ userId }) => {
             <p className="text-md text-gray-600">Connections</p>
           </div>
 
-          {!isOwnProfile && (
+          {!isOwnProfile && !isFriend && (
             <div className="mt-8 space-x-4">
               <button
                 onClick={handleConnect}
