@@ -12,6 +12,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer # typ
 from rest_framework_simplejwt.views import TokenObtainPairView  # type: ignore
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import *
+from django.db.models import Q
 # Create your views here.
 
 class RegisterView(APIView):
@@ -279,6 +280,55 @@ class SpecificPendingRequestsView(APIView):
             serialized_requests.append(serialized_request)
 
         return Response(serialized_requests)
+    
+class FriendsListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        # Get connections where the user is either user1 or user2
+        connections_as_user1 = Connection.objects.filter(user1=user)
+        connections_as_user2 = Connection.objects.filter(user2=user)
+
+        friends = set()
+        
+        for connection in connections_as_user1:
+            friends.add(connection.user2)
+        
+        for connection in connections_as_user2:
+            friends.add(connection.user1)
+        
+        serialized_friends = []
+        
+        for friend in friends:
+            profile_picture_url = None
+            try:
+                if friend.profile_picture:
+                    profile_picture_url = request.build_absolute_uri(friend.profile_picture.url)
+            except Exception as e:
+                profile_picture_url = None
+
+            serialized_friend = {
+                'id': friend.id,
+                'username': friend.username,
+                'email': friend.email,
+                'profile_picture': profile_picture_url,
+            }
+            serialized_friends.append(serialized_friend)
+
+        return Response(serialized_friends)
+    
+class CheckFriendshipView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user1_id, user2_id):
+        are_friends = Connection.objects.filter(
+            (Q(user1_id=user1_id) & Q(user2_id=user2_id)) |
+            (Q(user1_id=user2_id) & Q(user2_id=user1_id))
+        ).exists()
+
+        return Response({'are_friends': are_friends})
     
 class UserDetailsListView(generics.RetrieveAPIView):
     queryset = UserProfile.objects.all()

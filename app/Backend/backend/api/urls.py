@@ -19,5 +19,7 @@ urlpatterns = [
     path('connections/pending/', PendingConnectionRequestsView.as_view(), name='pending-connection-requests'),  
     path('connections/pending/<int:from_user_id>/<int:to_user_id>/', SpecificPendingRequestsView.as_view(), name='specific-pending-requests'),
     path('connections/handle/', HandleConnectionRequestView.as_view(), name='handle-connection-request'),
+    path('connections/friends/', FriendsListView.as_view(), name='friends-list'),
+    path('connections/check_friendship/<int:user1_id>/<int:user2_id>/', CheckFriendshipView.as_view(), name='check-friendship'),
     path('connections/block/', BlockUserView.as_view(), name='block-user'),
 ]
