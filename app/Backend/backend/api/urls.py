@@ -21,5 +21,6 @@ urlpatterns = [
     path('connections/handle/', HandleConnectionRequestView.as_view(), name='handle-connection-request'),
     path('connections/friends/', FriendsListView.as_view(), name='friends-list'),
     path('connections/check_friendship/<int:user1_id>/<int:user2_id>/', CheckFriendshipView.as_view(), name='check-friendship'),
+    path('connections/remove_friend/<int:friend_id>/', RemoveFriendView.as_view(), name='remove_friend'),
     path('connections/block/', BlockUserView.as_view(), name='block-user'),
 ]

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.views import APIView
@@ -254,7 +254,6 @@ class SpecificPendingRequestsView(APIView):
         pending_requests = ConnectionRequest.objects.filter(
             from_user__id=from_user_id, to_user__id=to_user_id
         )
-        print("pending --", pending_requests)
 
         serialized_requests = []
         for request in pending_requests:
@@ -329,6 +328,25 @@ class CheckFriendshipView(APIView):
         ).exists()
 
         return Response({'are_friends': are_friends})
+    
+class RemoveFriendView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, friend_id, *args, **kwargs):
+        user = request.user
+        friend = get_object_or_404(UserProfile, id=friend_id)
+
+        # Find and delete the connection
+        connection = Connection.objects.filter(
+            (Q(user1=user) & Q(user2=friend)) | (Q(user1=friend) & Q(user2=user))
+        ).first()
+
+        if connection:
+            connection.delete()
+            return Response({'detail': 'Friend removed successfully.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Connection not found.'}, status=status.HTTP_404_NOT_FOUND)
+
     
 class UserDetailsListView(generics.RetrieveAPIView):
     queryset = UserProfile.objects.all()
