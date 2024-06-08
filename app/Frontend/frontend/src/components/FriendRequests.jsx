@@ -61,6 +61,17 @@ const FriendRequests = () => {
     }
   };
 
+  const handleRemoveFriend = async (friendId) => {
+    try {
+      await api.post(`/api/connections/remove_friend/${friendId}/`);
+      setFriends(friends.filter((friend) => friend.id !== friendId));
+      toast.success("Friend removed successfully");
+    } catch (error) {
+      console.error("Error removing friend:", error);
+      toast.error("Error removing friend");
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8">
       <Toaster position="top-left" reverseOrder="false"></Toaster>
@@ -120,38 +131,61 @@ const FriendRequests = () => {
       </div>
 
       <div>
-        <h3 className="text-2xl font-semibold mb-6 text-gray-700">
-          Current Friends
-        </h3>
-        {friends.length === 0 ? (
-          <p className="text-gray-600">No friends</p>
-        ) : (
-          friends.map((friend) => (
-            <div
-              key={friend.id}
-              className="flex items-center mb-6 p-4 bg-gray-100 rounded-lg shadow-sm"
-            >
-              <Link to={`/profilepage/${friend.id}`}>
-                <img
-                  src={
-                    friend.profile_picture || "https://via.placeholder.com/50"
-                  }
-                  alt={friend.username}
-                  className="w-12 h-12 rounded-full object-cover mr-4"
-                />
-              </Link>
-              <div>
-                <Link to={`/profilepage/${friend.id}`}>
-                  <p className="text-lg font-semibold text-gray-800">
-                    {friend.username}
-                  </p>
-                </Link>
-                <p className="text-gray-600">{friend.email}</p>
-              </div>
-            </div>
-          ))
-        )}
+  <h3 className="text-2xl font-semibold mb-6 text-gray-700">
+    Current Friends
+  </h3>
+  {friends.length === 0 ? (
+    <p className="text-gray-600">No friends</p>
+  ) : (
+    friends.map((friend) => (
+      <div
+        key={friend.id}
+        className="flex items-center justify-between mb-6 p-4 bg-gray-100 rounded-lg shadow-sm"
+      >
+        <div className="flex items-center">
+          <Link to={`/profilepage/${friend.id}`}>
+            <img
+              src={friend.profile_picture || "https://via.placeholder.com/50"}
+              alt={friend.username}
+              className="w-12 h-12 rounded-full object-cover mr-4"
+            />
+          </Link>
+          <div>
+            <Link to={`/profilepage/${friend.id}`}>
+              <p className="text-lg font-semibold text-gray-800">
+                {friend.username}
+              </p>
+            </Link>
+            <p className="text-gray-600">{friend.email}</p>
+          </div>
+        </div>
+        <button
+  onClick={() => handleRemoveFriend(friend.id)}
+  className="text-red-500 hover:text-red-700 transition flex items-center"
+>
+Remove
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    className="w-6 h-6 mr-2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M6 18L18 6M6 6l12 12"
+    />
+  </svg>
+ 
+</button>
+
       </div>
+    ))
+  )}
+</div>
+
     </div>
   );
 };

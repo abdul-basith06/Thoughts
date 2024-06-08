@@ -39,7 +39,9 @@ const UserProfileComp = ({ userId }) => {
 
     const checkFriendship = async () => {
       try {
-        const response = await api.get(`/api/connections/check_friendship/${userId}/${loggedInUserId}/`);
+        const response = await api.get(
+          `/api/connections/check_friendship/${userId}/${loggedInUserId}/`
+        );
         setIsFriend(response.data.are_friends);
       } catch (error) {
         console.error("Error checking friendship status:", error);
@@ -80,7 +82,6 @@ const UserProfileComp = ({ userId }) => {
   const profilePictureUrl = user.profile_picture
     ? user.profile_picture
     : "https://wallpapers.com/images/featured/cool-profile-picture-87h46gcobjl5e4xu.jpg";
-
 
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
@@ -125,8 +126,8 @@ const UserProfileComp = ({ userId }) => {
             <p className="text-md text-gray-600">Connections</p>
           </div>
 
-          {!isOwnProfile && !isFriend && (
-            <div className="mt-8 space-x-4">
+          <div className="mt-8 space-x-4">
+            {!isOwnProfile && !isFriend && (
               <button
                 onClick={handleConnect}
                 disabled={hasPending}
@@ -138,11 +139,13 @@ const UserProfileComp = ({ userId }) => {
               >
                 {hasPending ? "Connection Pending" : "Connect"}
               </button>
+            )}
+            {isFriend && (
               <button className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer">
                 Chat
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
