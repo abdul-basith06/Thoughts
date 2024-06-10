@@ -58,9 +58,9 @@ const Navbar = () => {
                   Home
                 </li>
               </Link>
-              <Link spy={true} smooth={true} to="/">
+              <Link spy={true} smooth={true} to="/chats">
                 <li className="hover:text-fuchsia-600 transition border-b-2 border-slate-900 hover:border-fuchsia-600 cursor-pointer ">
-                  About
+                  Inbox
                 </li>
               </Link>
               <Link spy={true} smooth={true} to="/friends">

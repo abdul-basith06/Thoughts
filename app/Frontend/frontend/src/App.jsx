@@ -6,6 +6,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
 import UserProfile from "./pages/UserProfile";
 import FriendRequestPage from "./pages/FriendRequestPage";
+import ChatPage from "./pages/ChatPage";
+import ChatlistPage from "./pages/ChatlistPage";
 
 function Logout() {
   localStorage.clear();
@@ -54,6 +56,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <FriendRequestPage />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/chat/:userId"
+            element={
+              <ProtectedRoute>
+                <ChatPage />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/chats"
+            element={
+              <ProtectedRoute>
+                <ChatlistPage />
               </ProtectedRoute>
             }
           />

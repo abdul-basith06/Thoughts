@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { ACCESS_TOKEN } from "../constants";
 import toast, { Toaster } from "react-hot-toast";
 import FormatActiveDate from "../utils/formatActiveDate";
+import { Link } from "react-router-dom";
 
 const UserProfileComp = ({ userId }) => {
   const [user, setUser] = useState("");
@@ -140,11 +141,13 @@ const UserProfileComp = ({ userId }) => {
                 {hasPending ? "Connection Pending" : "Connect"}
               </button>
             )}
+              <Link to={`/chat/${userId}`}>
             {isFriend && (
               <button className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-amber-600 transition cursor-pointer">
                 Chat
               </button>
             )}
+            </Link>
           </div>
         </div>
       </div>
