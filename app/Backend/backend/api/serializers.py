@@ -60,4 +60,12 @@ class BlockedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlockedUser
         fields = '__all__'
+        
+class ChatMessageSerializer(serializers.ModelSerializer):
+    sender = serializers.ReadOnlyField(source='sender.username')
+    recipient = serializers.ReadOnlyField(source='recipient.username')
+
+    class Meta:
+        model = ChatMessage
+        fields = ['id', 'sender', 'recipient', 'message', 'timestamp']
     

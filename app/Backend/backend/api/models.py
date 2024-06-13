@@ -70,3 +70,15 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.content[:20]
+    
+class ChatMessage(models.Model):
+    sender = models.ForeignKey(UserProfile, related_name='sent_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(UserProfile, related_name='received_messages', on_delete=models.CASCADE)
+    message = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f'{self.sender} to {self.recipient}: {self.message[:20]}'

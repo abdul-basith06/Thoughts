@@ -352,3 +352,23 @@ class UserDetailsListView(generics.RetrieveAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+    
+class SendMessageView(generics.CreateAPIView):
+    serializer_class = ChatMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(sender=self.request.user)
+
+class ChatMessagesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, recipient_id):
+        recipient = UserProfile.objects.get(pk=recipient_id)
+        messages = ChatMessage.objects.filter(
+            (Q(sender=request.user) & Q(recipient=recipient)) | 
+            (Q(sender=recipient) & Q(recipient=request.user))
+        ).order_by('timestamp')
+        
+        serializer = ChatMessageSerializer(messages, many=True)
+        return Response(serializer.data)

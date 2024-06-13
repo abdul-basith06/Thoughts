@@ -15,6 +15,7 @@ urlpatterns = [
     # path("comments/<int:pk>/"), FetchCommentsView.as_view(), name="fetch-comments"),
     path('comments/', CommentCreateView.as_view(), name='comment-create'),
     
+    # Connection urls
     path('connections/send/', SendConnectionRequestView.as_view(), name='send-connection-request'),
     path('connections/pending/', PendingConnectionRequestsView.as_view(), name='pending-connection-requests'),  
     path('connections/pending/<int:from_user_id>/<int:to_user_id>/', SpecificPendingRequestsView.as_view(), name='specific-pending-requests'),
@@ -23,4 +24,8 @@ urlpatterns = [
     path('connections/check_friendship/<int:user1_id>/<int:user2_id>/', CheckFriendshipView.as_view(), name='check-friendship'),
     path('connections/remove_friend/<int:friend_id>/', RemoveFriendView.as_view(), name='remove_friend'),
     path('connections/block/', BlockUserView.as_view(), name='block-user'),
+    
+    # Chat feature urls
+    path('chat/send/', SendMessageView.as_view(), name='send_message'),
+    path('chat/messages/<int:recipient_id>/', ChatMessagesView.as_view(), name='chat_messages'),
 ]
