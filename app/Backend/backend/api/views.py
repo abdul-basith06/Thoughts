@@ -353,22 +353,56 @@ class UserDetailsListView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
     
-class SendMessageView(generics.CreateAPIView):
+class ChatRoomListView(generics.ListAPIView):
+    serializer_class = ChatRoomSerializer
+    permission_classes =[IsAuthenticated]
+    def get_queryset(self):
+        return self.request.user.chat_rooms.all()
+
+class ChatRoomDetailView(generics.RetrieveAPIView):
+    queryset = ChatRoom.objects.all()
+    serializer_class = ChatRoomSerializer
+    permission_classes = [IsAuthenticated]
+
+class ChatMessagesView(generics.ListAPIView):
     serializer_class = ChatMessageSerializer
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save(sender=self.request.user)
+    def get_queryset(self):
+        room_id = self.kwargs['room_id']
+        return ChatMessage.objects.filter(chat_room_id=room_id).order_by('timestamp')
 
-class ChatMessagesView(APIView):
+class SendMessageView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, recipient_id):
-        recipient = UserProfile.objects.get(pk=recipient_id)
-        messages = ChatMessage.objects.filter(
-            (Q(sender=request.user) & Q(recipient=recipient)) | 
-            (Q(sender=recipient) & Q(recipient=request.user))
-        ).order_by('timestamp')
+    def post(self, request, room_id):
+        message = request.data.get('message')
+        chat_room = ChatRoom.objects.get(id=room_id)
+        chat_message = ChatMessage.objects.create(
+            chat_room=chat_room,
+            sender=request.user,
+            message=message
+        )
+        return Response({"message": "Message sent successfully"}, status=201)
+    
+    
+    
+# class SendMessageView(generics.CreateAPIView):
+#     serializer_class = ChatMessageSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def perform_create(self, serializer):
+#         serializer.save(sender=self.request.user)
+
+# class ChatMessagesView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request, recipient_id):
+#         recipient = UserProfile.objects.get(pk=recipient_id)
+#         messages = ChatMessage.objects.filter(
+#             (Q(sender=request.user) & Q(recipient=recipient)) | 
+#             (Q(sender=recipient) & Q(recipient=request.user))
+#         ).order_by('timestamp')
         
-        serializer = ChatMessageSerializer(messages, many=True)
-        return Response(serializer.data)
+#         serializer = ChatMessageSerializer(messages, many=True)
+#         return Response(serializer.data)

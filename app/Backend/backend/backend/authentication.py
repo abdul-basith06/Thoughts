@@ -1,45 +1,26 @@
-import jwt
-from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed
+# backend/authentication.py
+
+from urllib.parse import parse_qs
 from django.conf import settings
+import jwt
 from channels.db import database_sync_to_async
+from channels.middleware import BaseMiddleware
 from api.models import UserProfile
 
-class JWTAuthentication(BaseAuthentication):
-    def authenticate(self, request):
-        auth_header = request.headers.get('Authorization')
-        if not auth_header:
-            return None
+@database_sync_to_async
+def get_user(token):
+    try:
+        decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        user_id = decoded_token.get('user_id')
+        return UserProfile.objects.get(pk=user_id)
+    except (jwt.ExpiredSignatureError, jwt.DecodeError, UserProfile.DoesNotExist):
+        return None
 
-        try:
-            # Split the token prefix and the actual token
-            prefix, token = auth_header.split()
-            if prefix.lower() != 'bearer':
-                raise AuthenticationFailed('Invalid token prefix')
-
-            # Decode the token using the secret key
-            decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-            user_id = decoded_token.get('user_id')
-            user = UserProfile.objects.get(pk=user_id)
-        except (jwt.ExpiredSignatureError):
-            raise AuthenticationFailed('Token has expired')
-        except (jwt.DecodeError):
-            raise AuthenticationFailed('Error decoding token')
-        except (UserProfile.DoesNotExist):
-            raise AuthenticationFailed('No user matching this token was found')
-
-        return (user, None)
-
-    async def authenticate_websocket(self, scope, token):
-        try:
-            # Decode the token using the secret key
-            decoded_token = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-            user_id = decoded_token.get('user_id')
-            user = await database_sync_to_async(UserProfile.objects.get)(pk=user_id)
-        except (jwt.ExpiredSignatureError):
-            return None  # Token has expired
-        except (jwt.DecodeError):
-            return None  # Error decoding token
-        except (UserProfile.DoesNotExist):
-            return None  # No user matching this token was found
-        return user
+class JWTAuthMiddleware(BaseMiddleware):
+    async def __call__(self, scope, receive, send):
+        query_string = scope.get('query_string', b'').decode()
+        token = parse_qs(query_string).get('token')
+        if token:
+            token = token[0]
+            scope['user'] = await get_user(token)
+        return await super().__call__(scope, receive, send)

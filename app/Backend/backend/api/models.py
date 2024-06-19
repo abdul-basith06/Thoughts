@@ -71,9 +71,16 @@ class Comment(models.Model):
     def __str__(self):
         return self.content[:20]
     
+class ChatRoom(models.Model):
+    participants = models.ManyToManyField(UserProfile, related_name='chat_rooms')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"ChatRoom {self.id}"
+
 class ChatMessage(models.Model):
+    chat_room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(UserProfile, related_name='sent_messages', on_delete=models.CASCADE)
-    recipient = models.ForeignKey(UserProfile, related_name='received_messages', on_delete=models.CASCADE)
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -81,4 +88,16 @@ class ChatMessage(models.Model):
         ordering = ['timestamp']
 
     def __str__(self):
-        return f'{self.sender} to {self.recipient}: {self.message[:20]}'
+        return f'{self.sender} in room {self.chat_room.id}: {self.message[:20]}'
+    
+# class ChatMessage(models.Model):
+#     sender = models.ForeignKey(UserProfile, related_name='sent_messages', on_delete=models.CASCADE)
+#     recipient = models.ForeignKey(UserProfile, related_name='received_messages', on_delete=models.CASCADE)
+#     message = models.TextField()
+#     timestamp = models.DateTimeField(auto_now_add=True)
+
+#     class Meta:
+#         ordering = ['timestamp']
+
+#     def __str__(self):
+#         return f'{self.sender} to {self.recipient}: {self.message[:20]}'

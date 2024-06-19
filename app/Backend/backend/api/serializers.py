@@ -62,10 +62,25 @@ class BlockedUserSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class ChatMessageSerializer(serializers.ModelSerializer):
-    sender = serializers.ReadOnlyField(source='sender.username')
-    recipient = serializers.ReadOnlyField(source='recipient.username')
+    sender = UserSerializer(read_only=True)
 
     class Meta:
         model = ChatMessage
-        fields = ['id', 'sender', 'recipient', 'message', 'timestamp']
+        fields = ['id', 'chat_room', 'sender', 'message', 'timestamp']
+
+class ChatRoomSerializer(serializers.ModelSerializer):
+    participants = UserSerializer(many=True, read_only=True)
+    messages = ChatMessageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = ChatRoom
+        fields = ['id', 'participants', 'created_at', 'messages']
+        
+# class ChatMessageSerializer(serializers.ModelSerializer):
+#     sender = serializers.ReadOnlyField(source='sender.username')
+#     recipient = serializers.ReadOnlyField(source='recipient.username')
+
+#     class Meta:
+#         model = ChatMessage
+#         fields = ['id', 'sender', 'recipient', 'message', 'timestamp']
     

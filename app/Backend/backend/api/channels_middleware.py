@@ -6,16 +6,14 @@ from api.models import UserProfile
 from channels.middleware import BaseMiddleware
 from rest_framework.exceptions import AuthenticationFailed
 from django.db import close_old_connections
-from backend.authentication import JWTAuthentication
-
 
 @database_sync_to_async
-def get_user(token):
+def get_user_from_token(token):
     try:
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         user_id = decoded_token['user_id']
         user = UserProfile.objects.get(pk=user_id)
-    except UserProfile.DoesNotExist:
+    except (UserProfile.DoesNotExist, jwt.ExpiredSignatureError, jwt.DecodeError):
         user = AnonymousUser()
     return user
 
@@ -33,19 +31,12 @@ class JWTWebsocketMiddleware(BaseMiddleware):
                 "code": 4000
             })
             return  # Return early if no token is provided
-        
-        authentication = JWTAuthentication()
-        try:
-            user = await authentication.authenticate_websocket(scope, token)
-            if user is not None:
-                scope['user'] = user
-                return await super().__call__(scope, receive, send)
-            else:
-                await send({
-                    "type": "websocket.close",
-                    "code": 4000
-                })
-        except (jwt.ExpiredSignatureError, jwt.DecodeError, AuthenticationFailed):
+
+        user = await get_user_from_token(token)
+        if not isinstance(user, AnonymousUser):
+            scope['user'] = user
+            return await super().__call__(scope, receive, send)
+        else:
             await send({
                 "type": "websocket.close",
                 "code": 4000,

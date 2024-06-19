@@ -25,7 +25,9 @@ urlpatterns = [
     path('connections/remove_friend/<int:friend_id>/', RemoveFriendView.as_view(), name='remove_friend'),
     path('connections/block/', BlockUserView.as_view(), name='block-user'),
     
-    # Chat feature urls
-    path('chat/send/', SendMessageView.as_view(), name='send_message'),
-    path('chat/messages/<int:recipient_id>/', ChatMessagesView.as_view(), name='chat_messages'),
+    # Chat feature URLs
+    path('chat/rooms/', ChatRoomListView.as_view(), name='chat-room-list'),
+    path('chat/room/<int:room_id>/', ChatRoomDetailView.as_view(), name='chat-room-detail'),
+    path('chat/room/<int:room_id>/messages/', ChatMessagesView.as_view(), name='chat-messages'),
+    path('chat/room/<int:room_id>/send/', SendMessageView.as_view(), name='send-message'),
 ]
